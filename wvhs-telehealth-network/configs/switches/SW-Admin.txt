@@ -1,0 +1,65 @@
+! ============================================================
+! DEVICE:   SW-Admin
+! ROLE:     Departmental Access Switch — VLAN 30 (Administration)
+! SITE:     Ballarat Central Diagnostic Hub
+! Devices:  3x admin PCs, 2x printers, 1x file server
+! NOTE:     ACL 100 on R-Ballarat blocks this subnet from Radiology
+! ============================================================
+version 12.2
+service password-encryption
+hostname SW-Admin
+enable secret 5 $1$mERr$XXXXXXXXXXXXXXXXXXXXX
+banner motd ^AUTHORISED ACCESS ONLY. WVHS Network — SW-Admin^
+line console 0
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+line vty 0 15
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+vlan 30
+ name Administration
+interface FastEthernet0/1
+ description Admin-PC1
+ switchport mode access
+ switchport access vlan 30
+ no shutdown
+interface FastEthernet0/2
+ description Admin-PC2
+ switchport mode access
+ switchport access vlan 30
+ no shutdown
+interface FastEthernet0/3
+ description Admin-PC3
+ switchport mode access
+ switchport access vlan 30
+ no shutdown
+interface FastEthernet0/4
+ description Admin-Printer1
+ switchport mode access
+ switchport access vlan 30
+ no shutdown
+interface FastEthernet0/5
+ description Admin-Printer2
+ switchport mode access
+ switchport access vlan 30
+ no shutdown
+interface FastEthernet0/6
+ description Admin-FileServer
+ switchport mode access
+ switchport access vlan 30
+ no shutdown
+interface GigabitEthernet0/1
+ description Trunk-to-SW-Core-Ballarat
+ switchport mode trunk
+ switchport trunk allowed vlan 30
+ no shutdown
+interface vlan 30
+ ip address 10.7.9.34 255.255.255.240
+ no shutdown
+ip default-gateway 10.7.9.33
+interface range FastEthernet0/7 - 24
+ description UNUSED-SECURED
+ shutdown
+end

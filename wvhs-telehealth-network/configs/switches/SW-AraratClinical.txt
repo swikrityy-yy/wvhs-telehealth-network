@@ -1,0 +1,79 @@
+! ============================================================
+! DEVICE:   SW-Ararat-Clinical
+! ROLE:     Clinical Department Switch — Ararat Clinic
+! VLAN:     None (dedicated physical subnet)
+! SUBNET:   10.7.9.64/29
+! GATEWAY:  10.7.9.65
+! ============================================================
+
+version 12.2
+service password-encryption
+
+hostname SW-Ararat-Clinical
+
+enable secret 5 $1$mERr$XXXXXXXXXXXXXXXXXXXXX
+
+banner motd ^AUTHORISED ACCESS ONLY. WVHS Network — SW-Ararat-Clinical^
+
+! =========================
+! Console Access
+! =========================
+line console 0
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+
+! =========================
+! Remote Access
+! =========================
+line vty 0 15
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+
+! ============================================================
+! CLINICAL DEVICES
+! ============================================================
+
+interface FastEthernet0/1
+ description Ararat-Clinical-PC1
+ switchport mode access
+ no shutdown
+
+interface FastEthernet0/2
+ description Ararat-Clinical-PC2
+ switchport mode access
+ no shutdown
+
+interface FastEthernet0/3
+ description Ararat-NurseStation
+ switchport mode access
+ no shutdown
+
+! ============================================================
+! UPLINK TO ROUTER
+! ============================================================
+
+interface GigabitEthernet0/1
+ description Link-to-R-Ararat-Gi0/0
+ no shutdown
+
+! ============================================================
+! MANAGEMENT INTERFACE
+! ============================================================
+
+interface vlan 1
+ ip address 10.7.9.66 255.255.255.248
+ no shutdown
+
+ip default-gateway 10.7.9.65
+
+! ============================================================
+! UNUSED PORT SECURITY
+! ============================================================
+
+interface range FastEthernet0/4 - 24
+ description UNUSED-SECURED
+ shutdown
+
+end

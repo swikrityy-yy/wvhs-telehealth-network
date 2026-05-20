@@ -1,0 +1,44 @@
+! ============================================================
+! DEVICE:   SW-IT
+! ROLE:     Departmental Access Switch — VLAN 40 (IT Infrastructure)
+! SITE:     Ballarat Central Diagnostic Hub
+! Devices:  2x network management workstations
+! ============================================================
+version 12.2
+service password-encryption
+hostname SW-IT
+enable secret 5 $1$mERr$XXXXXXXXXXXXXXXXXXXXX
+banner motd ^AUTHORISED ACCESS ONLY. WVHS Network — SW-IT^
+line console 0
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+line vty 0 15
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+vlan 40
+ name IT-Infrastructure
+interface FastEthernet0/1
+ description IT-WS1
+ switchport mode access
+ switchport access vlan 40
+ no shutdown
+interface FastEthernet0/2
+ description IT-WS2
+ switchport mode access
+ switchport access vlan 40
+ no shutdown
+interface GigabitEthernet0/1
+ description Trunk-to-SW-Core-Ballarat
+ switchport mode trunk
+ switchport trunk allowed vlan 40
+ no shutdown
+interface vlan 40
+ ip address 10.7.9.50 255.255.255.248
+ no shutdown
+ip default-gateway 10.7.9.49
+interface range FastEthernet0/3 - 24
+ description UNUSED-SECURED
+ shutdown
+end

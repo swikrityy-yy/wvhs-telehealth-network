@@ -1,0 +1,55 @@
+! ============================================================
+! DEVICE:   SW-Core-Horsham
+! ROLE:     Site Switch — Horsham Medical Clinic
+! Devices serve Clinical (10.7.9.80/28) and Reception (10.7.9.96/29)
+! ============================================================
+version 12.2
+service password-encryption
+hostname SW-Core-Horsham
+enable secret 5 $1$mERr$XXXXXXXXXXXXXXXXXXXXX
+banner motd ^AUTHORISED ACCESS ONLY. WVHS Network — SW-Core-Horsham^
+line console 0
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+line vty 0 15
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+interface FastEthernet0/1
+ description Horsham-Clinical-PC1
+ switchport mode access
+ no shutdown
+interface FastEthernet0/2
+ description Horsham-Clinical-PC2
+ switchport mode access
+ no shutdown
+interface FastEthernet0/3
+ description Horsham-NurseStation
+ switchport mode access
+ no shutdown
+interface FastEthernet0/10
+ description Horsham-Reception-PC1
+ switchport mode access
+ no shutdown
+interface FastEthernet0/11
+ description Horsham-Reception-PC2
+ switchport mode access
+ no shutdown
+interface GigabitEthernet0/1
+ description Link-to-R-Horsham-Gi0/0
+ no shutdown
+interface GigabitEthernet0/2
+ description Link-to-R-Horsham-Gi0/1
+ no shutdown
+interface vlan 1
+ ip address 10.7.9.82 255.255.255.240
+ no shutdown
+ip default-gateway 10.7.9.81
+interface range FastEthernet0/4 - 9
+ description UNUSED-SECURED
+ shutdown
+interface range FastEthernet0/12 - 24
+ description UNUSED-SECURED
+ shutdown
+end

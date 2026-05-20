@@ -1,0 +1,49 @@
+! ============================================================
+! DEVICE:   SW-Cardiology
+! ROLE:     Departmental Access Switch — VLAN 20 (Cardiology)
+! SITE:     Ballarat Central Diagnostic Hub
+! Devices:  2x specialist workstations, 1x ECG analysis server
+! ============================================================
+version 12.2
+service password-encryption
+hostname SW-Cardiology
+enable secret 5 $1$mERr$XXXXXXXXXXXXXXXXXXXXX
+banner motd ^AUTHORISED ACCESS ONLY. WVHS Network — SW-Cardiology^
+line console 0
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+line vty 0 15
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+vlan 20
+ name Cardiology
+interface FastEthernet0/1
+ description Card-WS1
+ switchport mode access
+ switchport access vlan 20
+ no shutdown
+interface FastEthernet0/2
+ description Card-WS2
+ switchport mode access
+ switchport access vlan 20
+ no shutdown
+interface FastEthernet0/3
+ description Card-ECGServer
+ switchport mode access
+ switchport access vlan 20
+ no shutdown
+interface GigabitEthernet0/1
+ description Trunk-to-SW-Core-Ballarat
+ switchport mode trunk
+ switchport trunk allowed vlan 20
+ no shutdown
+interface vlan 20
+ ip address 10.7.9.18 255.255.255.248
+ no shutdown
+ip default-gateway 10.7.9.17
+interface range FastEthernet0/4 - 24
+ description UNUSED-SECURED
+ shutdown
+end

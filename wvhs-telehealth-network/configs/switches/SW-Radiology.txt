@@ -1,0 +1,89 @@
+! ============================================================
+! DEVICE:   SW-Radiology
+! ROLE:     Departmental Access Switch — VLAN 10 (Radiology)
+! SITE:     Ballarat Central Diagnostic Hub
+! MODEL:    Cisco 2960
+! PROJECT:  WVHS Regional Telehealth Network — NIT1104 Group 9
+!
+! All ports on this switch are in VLAN 10.
+! Devices: 2x imaging workstations, 2x imaging servers, 1x PACS
+! ============================================================
+
+version 12.2
+service password-encryption
+!
+hostname SW-Radiology
+!
+enable secret 5 $1$mERr$XXXXXXXXXXXXXXXXXXXXX
+!
+banner motd ^
+AUTHORISED ACCESS ONLY. WVHS Network — SW-Radiology
+^
+!
+line console 0
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+!
+line vty 0 15
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+!
+! ── Create VLAN 10 on this switch ──────────────────────────
+vlan 10
+ name Radiology
+!
+! ── Access ports for Radiology devices ─────────────────────
+! Access ports: end devices connect here, untagged to the PC
+! Switch adds VLAN 10 tag internally, strips it on delivery
+interface FastEthernet0/1
+ description Rad-WS1
+ switchport mode access
+ switchport access vlan 10
+ no shutdown
+!
+interface FastEthernet0/2
+ description Rad-WS2
+ switchport mode access
+ switchport access vlan 10
+ no shutdown
+!
+interface FastEthernet0/3
+ description Rad-ImagingServer1
+ switchport mode access
+ switchport access vlan 10
+ no shutdown
+!
+interface FastEthernet0/4
+ description Rad-ImagingServer2
+ switchport mode access
+ switchport access vlan 10
+ no shutdown
+!
+interface FastEthernet0/5
+ description Rad-PACSSystem
+ switchport mode access
+ switchport access vlan 10
+ no shutdown
+!
+! ── Uplink trunk to SW-Core-Ballarat ───────────────────────
+interface GigabitEthernet0/1
+ description Trunk-to-SW-Core-Ballarat
+ switchport mode trunk
+ switchport trunk allowed vlan 10
+ no shutdown
+!
+! ── Management interface ───────────────────────────────────
+interface vlan 10
+ ip address 10.7.9.10 255.255.255.240
+ no shutdown
+!
+ip default-gateway 10.7.9.1
+!
+! ── Shut down unused ports ─────────────────────────────────
+interface range FastEthernet0/6 - 24
+ description UNUSED-SECURED
+ shutdown
+!
+end

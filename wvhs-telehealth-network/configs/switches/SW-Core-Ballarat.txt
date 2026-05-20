@@ -1,0 +1,119 @@
+! ============================================================
+! DEVICE:   SW-Core-Ballarat
+! ROLE:     Core Distribution Switch — Ballarat Hub
+! MODEL:    Cisco 2960
+! PROJECT:  WVHS Regional Telehealth Network — NIT1104 Group 9
+!
+! This is the most critical switch in the network.
+! All departmental switches connect here.
+! Single trunk port carries all 4 VLANs to R-Ballarat.
+! ============================================================
+
+version 12.2
+service password-encryption
+!
+hostname SW-Core-Ballarat
+!
+enable secret 5 $1$mERr$XXXXXXXXXXXXXXXXXXXXX
+!
+banner motd ^
+AUTHORISED ACCESS ONLY. WVHS Network — SW-Core-Ballarat
+^
+!
+line console 0
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+!
+line vty 0 15
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+!
+! ============================================================
+! VLAN DATABASE
+! All 4 VLANs must be created here so the core switch
+! can carry and forward tagged traffic for each VLAN
+! ============================================================
+vlan 10
+ name Radiology
+!
+vlan 20
+ name Cardiology
+!
+vlan 30
+ name Administration
+!
+vlan 40
+ name IT-Infrastructure
+!
+! ============================================================
+! TRUNK PORTS — carry multiple VLANs with 802.1Q tags
+! ============================================================
+
+! ── Trunk uplink to R-Ballarat (router-on-a-stick) ─────────
+! This single cable carries ALL 4 VLANs to the router
+! Encapsulation: 802.1Q (dot1q) — industry standard VLAN tagging
+interface GigabitEthernet0/1
+ description Trunk-to-R-Ballarat
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40
+ no shutdown
+!
+! ── Trunk to SW-Radiology ──────────────────────────────────
+interface GigabitEthernet0/2
+ description Trunk-to-SW-Radiology
+ switchport mode trunk
+ switchport trunk allowed vlan 10
+ no shutdown
+!
+! ── Trunk to SW-Cardiology ─────────────────────────────────
+interface GigabitEthernet0/3
+ description Trunk-to-SW-Cardiology
+ switchport mode trunk
+ switchport trunk allowed vlan 20
+ no shutdown
+!
+! ── Trunk to SW-Admin ──────────────────────────────────────
+interface GigabitEthernet0/4
+ description Trunk-to-SW-Admin
+ switchport mode trunk
+ switchport trunk allowed vlan 30
+ no shutdown
+!
+! ── Trunk to SW-IT ─────────────────────────────────────────
+interface GigabitEthernet0/5
+ description Trunk-to-SW-IT
+ switchport mode trunk
+ switchport trunk allowed vlan 40
+ no shutdown
+!
+! ============================================================
+! MANAGEMENT IP
+! Assigned to VLAN 40 (IT Infrastructure) for management access
+! NOTE: IP was reassigned to 10.7.9.46 after duplicate IP conflict
+! was detected on original assignment
+! ============================================================
+interface vlan 40
+ description Management-Interface
+ ip address 10.7.9.46 255.255.255.248
+ no shutdown
+!
+ip default-gateway 10.7.9.49
+!
+! ============================================================
+! UNUSED PORT SECURITY — shut down all unused ports
+! ============================================================
+interface range FastEthernet0/1 - 24
+ description UNUSED-SECURED
+ shutdown
+!
+! ============================================================
+! VERIFICATION COMMANDS
+! ============================================================
+! show vlan brief                  <- VLANs and port assignments
+! show interfaces trunk            <- trunk ports and allowed VLANs
+! show ip interface brief          <- interface status
+! show mac address-table           <- learned MAC addresses
+!
+end

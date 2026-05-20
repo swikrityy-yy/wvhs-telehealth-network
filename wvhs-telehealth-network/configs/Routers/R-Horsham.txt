@@ -1,0 +1,107 @@
+! ============================================================
+! DEVICE:   R-Horsham
+! ROLE:     Spoke Router — Horsham Medical Clinic
+! SITE:     Horsham Medical Clinic
+! MODEL:    Cisco 2911
+! PROJECT:  WVHS Regional Telehealth Network — NIT1104 Group 9
+! ============================================================
+
+version 15.1
+service password-encryption
+!
+hostname R-Horsham
+!
+enable secret 5 $1$mERr$XXXXXXXXXXXXXXXXXXXXX
+!
+banner motd ^
+AUTHORISED ACCESS ONLY.
+Unauthorised access to this device is prohibited and will be prosecuted.
+WVHS Network — NIT1104 Group 9 — R-Horsham
+^
+!
+line console 0
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+ logging synchronous
+!
+line vty 0 4
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+!
+! ============================================================
+! LAN INTERFACES
+! Horsham Clinical is larger (8 hosts) → /28
+! Horsham Reception is smaller (4 hosts) → /29
+! ============================================================
+
+! ── Clinical Area subnet ───────────────────────────────────
+! Subnet: 10.7.9.80/28 | Hosts: 14 usable | Gateway: 10.7.9.81
+interface GigabitEthernet0/0
+ description LAN-Horsham-Clinical
+ ip address 10.7.9.81 255.255.255.240
+ duplex auto
+ speed auto
+ no shutdown
+!
+! ── Reception Area subnet ──────────────────────────────────
+! Subnet: 10.7.9.96/29 | Hosts: 6 usable | Gateway: 10.7.9.97
+interface GigabitEthernet0/1
+ description LAN-Horsham-Reception
+ ip address 10.7.9.97 255.255.255.248
+ duplex auto
+ speed auto
+ no shutdown
+!
+! ── GigabitEthernet0/2 unused — secured ────────────────────
+interface GigabitEthernet0/2
+ description UNUSED-SECURED
+ no ip address
+ shutdown
+!
+! ============================================================
+! WAN INTERFACE — Serial link to R-Ballarat (hub)
+! Subnet: 10.7.9.116/30
+! R-Horsham is the DTE end — NO clock rate needed here
+! Clock rate is configured on R-Ballarat (DCE end: 10.7.9.117)
+! ============================================================
+interface Serial0/0/0
+ description WAN-to-R-Ballarat
+ ip address 10.7.9.118 255.255.255.252
+ no shutdown
+!
+! ============================================================
+! STATIC ROUTING
+! R-Horsham knows its directly-connected networks:
+!   10.7.9.80/28  (Horsham Clinical — GigabitEthernet0/0)
+!   10.7.9.96/29  (Horsham Reception — GigabitEthernet0/1)
+!   10.7.9.116/30 (WAN to Ballarat — Serial0/0/0)
+!
+! All other destinations route via R-Ballarat (10.7.9.117)
+! ============================================================
+
+! ── Routes to Ballarat VLANs ───────────────────────────────
+ip route 10.7.9.0 255.255.255.240 10.7.9.117
+ip route 10.7.9.16 255.255.255.248 10.7.9.117
+ip route 10.7.9.32 255.255.255.240 10.7.9.117
+ip route 10.7.9.48 255.255.255.248 10.7.9.117
+
+! ── Routes to Ararat subnets (via Ballarat hub) ────────────
+ip route 10.7.9.64 255.255.255.248 10.7.9.117
+ip route 10.7.9.72 255.255.255.248 10.7.9.117
+
+! ── Route to Ballarat-Ararat WAN subnet ────────────────────
+ip route 10.7.9.112 255.255.255.252 10.7.9.117
+
+!
+! ============================================================
+! VERIFICATION COMMANDS
+! ============================================================
+! show ip interface brief
+! show ip route
+! ping 10.7.9.117              <- test WAN to Ballarat
+! ping 10.7.9.1                <- test to Ballarat Radiology gateway
+! ping 10.7.9.65               <- test to Ararat Clinical gateway
+!
+end

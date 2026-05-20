@@ -1,0 +1,74 @@
+! ============================================================
+! DEVICE:   SW-Ararat-Reception
+! ROLE:     Reception Department Switch — Ararat Clinic
+! VLAN:     None (dedicated physical subnet)
+! SUBNET:   10.7.9.72/29
+! GATEWAY:  10.7.9.73
+! ============================================================
+
+version 12.2
+service password-encryption
+
+hostname SW-Ararat-Reception
+
+enable secret 5 $1$mERr$XXXXXXXXXXXXXXXXXXXXX
+
+banner motd ^AUTHORISED ACCESS ONLY. WVHS Network — SW-Ararat-Reception^
+
+! =========================
+! Console Access
+! =========================
+line console 0
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+
+! =========================
+! Remote Access
+! =========================
+line vty 0 15
+ password 7 XXXXXXXXXXXXXXXX
+ login
+ exec-timeout 5 0
+
+! ============================================================
+! RECEPTION DEVICES
+! ============================================================
+
+interface FastEthernet0/1
+ description Ararat-Reception-PC1
+ switchport mode access
+ no shutdown
+
+interface FastEthernet0/2
+ description Ararat-Reception-PC2
+ switchport mode access
+ no shutdown
+
+! ============================================================
+! UPLINK TO ROUTER
+! ============================================================
+
+interface GigabitEthernet0/1
+ description Link-to-R-Ararat-Gi0/1
+ no shutdown
+
+! ============================================================
+! MANAGEMENT INTERFACE
+! ============================================================
+
+interface vlan 1
+ ip address 10.7.9.74 255.255.255.248
+ no shutdown
+
+ip default-gateway 10.7.9.73
+
+! ============================================================
+! UNUSED PORT SECURITY
+! ============================================================
+
+interface range FastEthernet0/3 - 24
+ description UNUSED-SECURED
+ shutdown
+
+end
